@@ -1,12 +1,22 @@
-# php-web-app — Bài lab B2: Triển khai ứng dụng qua Docker
+# Bài lab B2 — Triển khai ứng dụng qua Docker
 
 Ứng dụng quản lý sinh viên, mô hình **2 container**: `php-web` (PHP 8.3 + Apache) và
 `mysql-db` (MySQL 8.0), nối nhau qua network `php-network`, dữ liệu lưu ở volume `mysql_data`.
 
+## Lấy source về máy ảo Ubuntu
+
+```bash
+git clone https://gitlab.com/leeictu/trienkhaiquantrihethongphanmem.git
+cp -r trienkhaiquantrihethongphanmem/bai2 ~/php-web-app
+cd ~/php-web-app
+```
+
+Từ đây trở xuống, mọi lệnh đều chạy trong `~/php-web-app`.
+
 ## Cấu trúc
 
 ```
-php-web-app/
+bai2/                  → chép thành ~/php-web-app
 ├── Dockerfile
 ├── .dockerignore
 ├── src/
@@ -18,9 +28,7 @@ php-web-app/
 └── README.md
 ```
 
-## Chạy lab (trên máy ảo Ubuntu 20.04)
-
-Chép cả thư mục này vào `~/php-web-app` rồi:
+## Chạy lab
 
 ```bash
 cd ~/php-web-app
@@ -88,9 +96,20 @@ curl -I http://localhost:8889      # HTTP/1.1 200 OK
 
 Chụp màn hình `docker ps`, `docker logs` và trình duyệt ở cổng 8889 để nộp báo cáo.
 
+## Dọn dẹp
+
+```bash
+docker rm -f php-web mysql-db
+docker network rm php-network
+docker volume rm mysql_data       # chỉ khi muốn xóa hẳn dữ liệu
+```
+
 ## Lưu ý
 
 - `init.sql` chỉ chạy khi volume `mysql_data` còn **trống** (lần đầu). Muốn khởi tạo lại:
   `docker rm -f mysql-db && docker volume rm mysql_data` rồi chạy lại bước 2.
-- Mật khẩu để trần qua `-e` chỉ phù hợp môi trường lab. Production dùng Docker Secrets / Vault.
-- `data/` nằm trong `.dockerignore` nên **không** bị copy vào image — nó được bind mount vào MySQL lúc chạy.
+- Mật khẩu để trần qua `-e` chỉ phù hợp môi trường lab. Production dùng Docker Secrets / Vault
+  (xem bài 9 — Bảo mật & củng cố hệ thống).
+- `data/` nằm trong `.dockerignore` nên **không** bị copy vào image — nó được bind mount vào
+  MySQL lúc chạy.
+- Bài 3 sẽ gom toàn bộ phần này vào một file `docker-compose.yml` duy nhất.
