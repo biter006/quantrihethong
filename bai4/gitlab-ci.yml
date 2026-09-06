@@ -1,0 +1,45 @@
+stages:
+  - lint
+  - build
+  - deploy
+
+variables:
+  APP_DIR: bai3/php-web-app
+  IMAGE: $CI_REGISTRY_IMAGE/php-web-app
+
+lint-php:
+  stage: lint
+  image: php:8.3-cli
+  script:
+    - find $APP_DIR/src -name "*.php" -exec php -l {} \;
+
+lint-compose:
+  stage: lint
+  image: docker:27-cli
+  script:
+    - cd $APP_DIR && cp .env.example .env
+    - docker compose config --quiet
+
+build-image:
+  stage: build
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - cd $APP_DIR
+    - docker build -t "$IMAGE:$CI_COMMIT_SHORT_SHA" -t "$IMAGE:latest" .
+    - docker push "$IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker push "$IMAGE:latest"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-instructions:
+  stage: deploy
+  image: alpine:3
+  script:
+    - echo "docker pull $IMAGE:$CI_COMMIT_SHORT_SHA"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
