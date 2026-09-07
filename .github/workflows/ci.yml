@@ -9,7 +9,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-   env:
+    env:
       APP_DIR: bai3/php-web-app
     steps:
       - uses: actions/checkout@v4
