@@ -9,6 +9,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+   env:
+      APP_DIR: bai3/php-web-app
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
